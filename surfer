@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Online Casino - Slots</title>
+<style>
+body {
+font-family: Arial, sans-serif;
+background-color: #1a1a1a;
+color: #fff;
+text-align: center;
+padding: 20px;
+margin: 0;
+}
+h1 { color: #ffcc00; font-size: 28px; }
+.balance-container { font-size: 22px; margin: 15px 0; color: #4caf50; font-weight: bold; }
+.slot-machine {
+display: flex;
+justify-content: center;
+gap: 15px;
+margin: 30px auto;
+background: #333;
+padding: 20px;
+border-radius: 15px;
+border: 5px solid #ffcc00;
+max-width: 320px;
+box-shadow: 0 0 20px rgba(255,204,0,0.5);
+}
+.reel {
+width: 70px;
+height: 70px;
+background: #fff;
+color: #000;
+font-size: 40px;
+line-height: 70px;
+border-radius: 10px;
+font-weight: bold;
+}
+button {
+display: block;
+width: 80%;
+max-width: 280px;
+margin: 15px auto;
+padding: 15px;
+font-size: 18px;
+font-weight: bold;
+border: none;
+border-radius: 10px;
+cursor: pointer;
+}
+.btn-spin { background-color: #ffcc00; color: #000; }
+.btn-ad { background-color: #00bcd4; color: #fff; }
+.message { font-size: 18px; height: 25px; margin: 15px 0; color: #ff5722; font-weight: bold; }
+</style>
+</head>
+<body>
+<h1>🎰 My Online Casino 🎰</h1>
+<div class="balance-container">Balance: $<span id="balance">500</span></div>
+<div class="slot-machine">
+<div class="reel" id="reel1">🍒</div>
+<div class="reel" id="reel2">🍋</div>
+<div class="reel" id="reel3">💎</div>
+</div>
+<div class="message" id="status-msg">Press Spin to Play ($10)!</div>
+<button class="btn-spin" id="spin-btn" onclick="spin()">SPIN</button>
+<button class="btn-ad" onclick="watchRewardedAd()">📺 Watch Ad for +$100</button>
+<script>
+const symbols = ['🍒', '🍋', '💎', '🔔', '7️⃣', '🍀'];
+let balance = 500;
+const balanceEl = document.getElementById('balance');
+const reel1El = document.getElementById('reel1');
+const reel2El = document.getElementById('reel2');
+const reel3El = document.getElementById('reel3');
+const statusEl = document.getElementById('status-msg');
+function spin() {
+if (balance < 10) {
+statusEl.textContent = "Out of money! Watch an ad to refill!";
+return;
+}
+balance -= 10;
+balanceEl.textContent = balance;
+statusEl.textContent = "Spinning...";
+let t = 0;
+let interval = setInterval(() => {
+reel1El.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+reel2El.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+reel3El.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+t++;
+if (t > 10) {
+clearInterval(interval);
+evaluateResults();
+}
+}, 70);
+}
+function evaluateResults() {
+const r1 = reel1El.textContent;
+const r2 = reel2El.textContent;
+const r3 = reel3El.textContent;
+if (r1 === r2 && r2 === r3) {
+balance += 100;
+statusEl.textContent = "🎉 JACKPOT! You won $100! 🎉";
+} else if (r1 === r2 || r2 === r3 || r1 === r3) {
+balance += 20;
+statusEl.textContent = "😃 Small Win! You won $20!";
+} else {
+statusEl.textContent = "❌ Try Again!";
+}
+balanceEl.textContent = balance;
+}
+function watchRewardedAd() {
+alert("Simulating Ad Playback...");
+balance += 100;
+balanceEl.textContent = balance;
+statusEl.textContent = "🎁 Ad watched! +$100 added!";
+}
+</script>
+</body>
+</html>
