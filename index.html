@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahjong Surfer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #4fc3f7, #01579b);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            text-align: center;
+            overflow-x: hidden;
+        }
+        header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px #000;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            margin: 5px 0 0 0;
+            font-style: italic;
+            color: #ffe082;
+        }
+        #game-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        #stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+            padding: 10px;
+            justify-items: center;
+        }
+        .tile {
+            width: 70px;
+            height: 95px;
+            background: #fffdf0;
+            border-radius: 6px;
+            box-shadow: 0 5px 0 #cfd8dc, 0 8px 10px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            user-select: none;
+            border: 1px solid #d7ccc8;
+        }
+        .tile:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #cfd8dc, 0 4px 6px rgba(0,0,0,0.5);
+        }
+        .tile.selected {
+            background: #ffe082;
+            border: 2px solid #ffb300;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 0 #ffb300, 0 12px 15px rgba(0,0,0,0.4);
+        }
+        .tile-icon {
+            font-size: 2rem;
+            margin-bottom: 2px;
+        }
+        .tile-label {
+            font-size: 0.75rem;
+            color: #5d4037;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        #ad-placeholder {
+            margin: 40px auto 20px auto;
+            max-width: 728px;
+            height: 90px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px dashed #ffe082;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ffe082;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+        #controls {
+            margin-top: 25px;
+        }
+        button {
+            background: #ffb300;
+            color: #3e2723;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #ffa000;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>MAHJONG SURFER</h1>
+        <p class="subtitle">Catch the Waves, Match the Tiles!</p>
+    </header>
+
+    <div id="game-container">
+        <div id="stats">
+            <div>Score: <span id="score">0</span></div>
+            <div>Matches Left: <span id="matches-left">9</span></div>
+        </div>
+
+        <div id="board">
+            <!-- Tiles will be loaded here dynamically by JavaScript -->
+        </div>
+
+        <div id="controls">
+            <button onclick="resetGame()">New Tropical Game</button>
+        </div>
+    </div>
+
+    <!-- This placeholder area is where your monetization ad banner will go live later -->
+    <div id="ad-placeholder">
+        Advertisement Banner Placeholder (Income Generating Area)
+    </div>
+
+    <script>
+        // Surfer themed items for the Mahjong tiles
+        const surfItems = [
+            { icon: '🏄‍♂️', label: 'Surfer' },
+            { icon: '🌊', label: 'Wave' },
+            { icon: '☀️', label: 'Sun' },
+            { icon: '🌴', label: 'Palm' },
+            { icon: '🦈', label: 'Shark' },
+            { icon: '🍍', label: 'Pineapple' },
+            { icon: '🕶️', label: 'Shades' },
+            { icon: '🍹', label: 'Cocktail' },
+            { icon: '🐚', label: 'Shell' }
+        ];
+
+        let selectedTile = null;
+        let score = 0;
+
+        function createBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            
+            // Create pairs for matching
+            let deck = [];
+            surfItems.forEach(item => {
+                deck.push({ ...item, id: Math.random() });
+                deck.push({ ...item, id: Math.random() });
+            });
+
+            // Shuffle the deck completely
+            deck.sort(() => Math.random() - 0.5);
+
+            document.getElementById('matches-left').innerText = surfItems.length;
+
+            // Render tiles to grid
+            deck.forEach(item => {
+                const tileDiv = document.createElement('div');
+                tileDiv.className = 'tile';
+                tileDiv.dataset.label = item.label;
+                
+                tileDiv.innerHTML = `
+                    <div class="tile-icon">${item.icon}</div>
+                    <div class="tile-label">${item.label}</div>
+                `;
+
+                tileDiv.addEventListener('click', handleTileClick);
+                board.appendChild(tileDiv);
+            });
+        }
+
+        function handleTileClick(e) {
+            const clickedTile = e.currentTarget;
+
+            // If clicked tile is already matched/hidden, do nothing
+            if (clickedTile.style.visibility === 'hidden') return;
+
+            if (selectedTile === null) {
+                // First tile selected
+                selectedTile = clickedTile;
+                selectedTile.classList.add('selected');
+            } else if (selectedTile === clickedTile) {
+                // Clicked the same tile twice, unselect it
+                selectedTile.classList.remove('selected');
+                selectedTile = null;
+            } else {
+                // Second tile selected, check for match
+                if (selectedTile.dataset.label === clickedTile.dataset.label) {
+                    // Match found! Hide both tiles
+                    selectedTile.style.visibility = 'hidden';
+                    clickedTile.style.visibility = 'hidden';
+                    
+                    score += 100;
+                    document.getElementById('score').innerText = score;
+                    
+                    let currentMatches = parseInt(document.getElementById('matches-left').innerText);
+                    document.getElementById('matches-left').innerText = currentMatches - 1;
+
+                    if (currentMatches - 1 === 0) {
+                        alert('Cowabunga! You cleared the board!');
+                    }
+                } else {
+                    // Not a match, clear selection styling
+                    selectedTile.classList.remove('selected');
+                }
+                selectedTile = null;
+            }
+        }
+
+        function resetGame() {
+            score = 0;
+            document.getElementById('score').innerText = score;
+            selectedTile = null;
+            createBoard();
+        }
+
+        // Initialize game on load
+        createBoard();
+    </script>
+</body>
+</html>
