@@ -1,0 +1,36 @@
+const randomX = Math.floor(Math.random() * (container.clientWidth - 50));
+tile.style.left = randomX + 'px';
+tile.style.top = '0px';
+
+container.appendChild(tile);
+
+let topPos = 0;
+const containerHeight = container.clientHeight;
+
+const fallInterval = setInterval(() => {
+topPos += 4;
+tile.style.top = topPos + 'px';
+
+if (topPos >= containerHeight - 85 && topPos <= containerHeight - 30) {
+const tileLeft = parseInt(tile.style.left);
+const surferLeft = surfer.offsetLeft;
+
+if (tileLeft >= surferLeft - 30 && tileLeft <= surferLeft + 45) {
+score += 10;
+scoreDisplay.innerText = score;
+tile.remove();
+clearInterval(fallInterval);
+}
+}
+
+if (topPos > containerHeight) {
+tile.remove();
+clearInterval(fallInterval);
+}
+}, 30);
+}
+
+setInterval(spawnTile, 1500);
+</script>
+</body>
+</html>
